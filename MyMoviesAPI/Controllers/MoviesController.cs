@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MyMoviesAPI.Models;
 using MyMoviesAPI.Models.Movies;
 
@@ -20,9 +21,9 @@ public class MoviesController : ControllerBase
     /// </summary>
     /// <param name="movies">The List of Movies to be sorted</param>
     /// <param name="sortBy">The Enum Representing how the list should be sorted</param>
-    /// <param name="ascending">Whether the list should be sorted with Ascending or Descending order</param>
+    /// <param name="descending">Whether the list should be sorted with Ascending or Descending order</param>
     /// <returns></returns>
-    private IQueryable<Movie> SortMovies(IQueryable<Movie> movies, MovieSortBy? sortBy, bool ascending)
+    private IQueryable<Movie> SortMovies(IQueryable<Movie> movies, MovieSortBy? sortBy, bool descending)
     {
         switch (sortBy)
         {
@@ -42,7 +43,7 @@ public class MoviesController : ControllerBase
                 movies = movies.OrderBy(x => x.VoteAverage);
                 break;
         }
-        if (!ascending) movies = movies.Reverse();
+        if (!descending) movies = movies.Reverse();
 
         return movies;
     }
@@ -57,24 +58,24 @@ public class MoviesController : ControllerBase
     /// <returns></returns>
     [HttpGet("")]
     public async Task<ActionResult<PaginationDto<Movie>>> GetMovies([FromQuery] int pageSize = 20, [FromQuery] int page = 1, [FromQuery] string? title = null, [FromQuery] string? genre = null, 
-        [FromQuery] MovieSortBy? sortBy = null, bool ascending = false)
+        [FromQuery] MovieSortBy? sortBy = null, bool descending = true)
     {
         if (page < 1) return BadRequest($"Page {page} is an invalid input");
         if (pageSize < 1) return BadRequest($"PageSize {pageSize} is an invalid input");
 
-        IQueryable<Movie> movies = _dbContext.Movies.AsQueryable();
+        IQueryable<Movie> movies = _dbContext.Movies;
 
         if (genre != null) movies = movies.Where(x => x.Genre.ToLower().Contains(genre.ToLower()));
         if (title != null) movies = movies.Where(x => x.Title.ToLower().Contains(title.ToLower()));
 
-        if (sortBy != null) movies = SortMovies(movies, sortBy, ascending);
+        if (sortBy != null) movies = SortMovies(movies, sortBy, descending);
 
         int totalDataCount = movies.Count();
 
         movies = movies.Skip((page - 1) * pageSize).Take(pageSize);
         int pageCount = (totalDataCount + pageSize - 1) / pageSize;
 
-        return Ok(new PaginationDto<Movie>(movies.ToList(), totalDataCount, page, pageCount, pageSize, page - 1, page + 1));
+        return Ok(new PaginationDto<Movie>(await movies.ToListAsync(), totalDataCount, page, pageCount, pageSize, page - 1, page + 1));
     }
 
 }
