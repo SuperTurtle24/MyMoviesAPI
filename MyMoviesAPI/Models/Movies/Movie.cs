@@ -1,8 +1,9 @@
 using MyMoviesAPI.Models.Abstract;
 using MyMoviesAPI.Models.Actors;
+using MyMoviesAPI.Models.Interfaces;
 
 namespace MyMoviesAPI.Models.Movies;
-public class Movie : Entity
+public class Movie : Entity, IDtoable<MovieDto>
 {
     public DateTime ReleaseDate { get; set; }
     public string Title { get; set; }
@@ -13,7 +14,7 @@ public class Movie : Entity
     public string OriginalLanguage { get; set; }
     public string Genre { get; set; }
     public string PosterUrl { get; set; }
-    public List<Actor>? Actors { get; set; }
+    public virtual List<Actor>? Actors { get; set; }
 
     public Movie() { }
 
@@ -31,4 +32,6 @@ public class Movie : Entity
         PosterUrl = posterUrl;
         Actors = actors;
     }
+
+    public MovieDto ToDto() => new(this);
 }

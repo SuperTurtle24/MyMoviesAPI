@@ -1,9 +1,9 @@
 ﻿using MyMoviesAPI.Models.Abstract;
 
 namespace MyMoviesAPI.Models;
-public class PaginationDto<E> where E : Entity
+public class PaginationDto<D> where D : Dto
 {
-    public List<E> Data { get; set; }
+    public List<D> Data { get; set; }
     public int TotalDataCount { get; set; }
 
     public int Page { get; set; }
@@ -15,10 +15,10 @@ public class PaginationDto<E> where E : Entity
 
     public PaginationDto() { }
 
-    public PaginationDto(List<E> data, int totalDataCount, int page, int pageSize, int previousPage, int nextPage)
+    public PaginationDto(List<D> data, int page, int pageSize, int previousPage, int nextPage)
     {
         Data = data;
-        TotalDataCount = totalDataCount;
+        TotalDataCount = data.Count;
         Page = page;
         PageSize = pageSize;
         PageCount = (TotalDataCount + PageSize - 1) / PageSize;

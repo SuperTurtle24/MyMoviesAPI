@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using MyMoviesAPI.Models;
+using MyMoviesAPI.Models.Actors;
 using MyMoviesAPI.Models.Movies;
 
 namespace MyMoviesAPI.Controllers;
@@ -55,20 +57,39 @@ public class MoviesController : ControllerBase
     /// <param name="page">The Page Number</param>
     /// <param name="title">Filter by Movie Title</param>
     /// <param name="genre">Filter by Genre</param>
-    /// <returns></returns>
     [HttpGet("")]
-    public async Task<ActionResult<PaginationDto<Movie>>> GetMovies([FromQuery] int pageSize = 20, [FromQuery] int page = 1, [FromQuery] string? title = null, [FromQuery] string? genre = null, 
+    public async Task<ActionResult<PaginationDto<MovieDto>>> GetMovies([FromQuery] int pageSize = 20, [FromQuery] int page = 1, [FromQuery] string? title = null, [FromQuery] string? genre = null, 
         [FromQuery] MovieSortBy? sortBy = null, bool descending = true)
     {
         if (page < 1) return BadRequest($"Page {page} is an invalid input");
         if (pageSize < 1) return BadRequest($"PageSize {pageSize} is an invalid input");
 
-        int totalDataCount = _dbContext.Movies.Count();
-        IQueryable<Movie> movies = _dbContext.Movies.FilterMovies(genre, title);
+        IQueryable<Movie> movies = _dbContext.Movies.Include(x => x.Actors).FilterMovies(genre, title);
         if (sortBy != null) movies = SortMovies(movies, sortBy, descending);
 
         movies = movies.Skip((page - 1) * pageSize).Take(pageSize);
 
-        return Ok(new PaginationDto<Movie>(await movies.ToListAsync(), totalDataCount, page, pageSize, page - 1, page + 1));
+        return Ok(new PaginationDto<MovieDto>(await movies.Select(x => x.ToDto()).ToListAsync(), page, pageSize, page - 1, page + 1));
+    }
+
+    /// <summary>
+    /// Add an Actor to a Movie
+    /// </summary>
+    /// <param name="movieId">The Id of the Movie</param>
+    /// <param name="actorId">The Id of the Actor</param>
+    [HttpPost("addActor")]
+    public async Task<ActionResult<MovieDto>> AddActor([FromQuery] Guid movieId, [FromQuery] Guid actorId)
+    {
+        Actor? actor = await _dbContext.Actors.FindAsync(actorId);
+        if (actor == null) return NotFound($"Cannot find Actor with the Id: {actorId}");
+        
+        Movie? movie = await _dbContext.Movies.FindAsync(movieId);
+        if (movie == null) return NotFound($"Cannot find Movie with the Id: {movieId}");
+
+        if (movie.Actors == null) movie.Actors = new();
+        movie.Actors.Add(actor);
+        
+        await _dbContext.SaveChangesAsync();
+        return Ok(movie.ToDto());
     }
 }
