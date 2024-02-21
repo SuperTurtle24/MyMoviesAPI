@@ -1,7 +1,9 @@
+using MyMoviesAPI.Models.Abstract;
+using MyMoviesAPI.Models.Actors;
+
 namespace MyMoviesAPI.Models.Movies;
-public class Movie
+public class Movie : Entity
 {
-    public Guid Id { get; set; }
     public DateTime ReleaseDate { get; set; }
     public string Title { get; set; }
     public string Overview { get; set; }
@@ -11,10 +13,11 @@ public class Movie
     public string OriginalLanguage { get; set; }
     public string Genre { get; set; }
     public string PosterUrl { get; set; }
+    public List<Actor>? Actors { get; set; }
 
     public Movie() { }
 
-    public Movie(Guid id, DateTime releaseDate, string title, string overview, double popularity, int voteCount, double voteAverage, string originalLanguage, string genre, string posterUrl)
+    public Movie(Guid id, DateTime releaseDate, string title, string overview, double popularity, int voteCount, double voteAverage, string originalLanguage, string genre, string posterUrl, List<Actor>? actors)
     {
         Id = id;
         ReleaseDate = releaseDate;
@@ -26,5 +29,6 @@ public class Movie
         OriginalLanguage = originalLanguage;
         Genre = genre;
         PosterUrl = posterUrl;
+        Actors = actors;
     }
 }
