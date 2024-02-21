@@ -13,13 +13,13 @@ public class PaginationDto<T>
 
     public PaginationDto() { }
 
-    public PaginationDto(List<T> data, int totalDataCount, int page, int pageCount, int pageSize, int previousPage, int nextPage)
+    public PaginationDto(List<T> data, int totalDataCount, int page, int pageSize, int previousPage, int nextPage)
     {
         Data = data;
         TotalDataCount = totalDataCount;
         Page = page;
-        PageCount = pageCount;
         PageSize = pageSize;
+        PageCount = (TotalDataCount + PageSize - 1) / PageSize;
         PreviousPage = previousPage;
         NextPage = nextPage;
     }

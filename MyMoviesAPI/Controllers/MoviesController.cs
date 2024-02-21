@@ -63,19 +63,12 @@ public class MoviesController : ControllerBase
         if (page < 1) return BadRequest($"Page {page} is an invalid input");
         if (pageSize < 1) return BadRequest($"PageSize {pageSize} is an invalid input");
 
-        IQueryable<Movie> movies = _dbContext.Movies;
-
-        if (genre != null) movies = movies.Where(x => x.Genre.ToLower().Contains(genre.ToLower()));
-        if (title != null) movies = movies.Where(x => x.Title.ToLower().Contains(title.ToLower()));
-
+        int totalDataCount = _dbContext.Movies.Count();
+        IQueryable<Movie> movies = _dbContext.Movies.FilterMovies(genre, title);
         if (sortBy != null) movies = SortMovies(movies, sortBy, descending);
 
-        int totalDataCount = movies.Count();
-
         movies = movies.Skip((page - 1) * pageSize).Take(pageSize);
-        int pageCount = (totalDataCount + pageSize - 1) / pageSize;
 
-        return Ok(new PaginationDto<Movie>(await movies.ToListAsync(), totalDataCount, page, pageCount, pageSize, page - 1, page + 1));
+        return Ok(new PaginationDto<Movie>(await movies.ToListAsync(), totalDataCount, page, pageSize, page - 1, page + 1));
     }
-
 }
