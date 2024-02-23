@@ -37,7 +37,7 @@ public class ActorController : ControllerBase
     }
 
     /// <summary>
-    /// Create an 
+    /// Create an Actor
     /// </summary>
     /// <param name="createActorDto"></param>
     /// <returns></returns>

@@ -58,6 +58,9 @@ public class MoviesController : ControllerBase
     /// <param name="page">The Page Number</param>
     /// <param name="title">Filter by Movie Title</param>
     /// <param name="genre">Filter by Genre</param>
+    /// <param name="actorId">Filter by an Actor with their Id</param>
+    /// <param name="sortBy">Use an MovieSortBy Enum to Sort the List</param>
+    /// <param name="descending">Whether you want the list returned in Ascending or Descending Order</param>
     [HttpGet("")]
     public async Task<ActionResult<PaginationDto<MovieDto>>> GetMovies([FromQuery] int pageSize = 20, [FromQuery] int page = 1, [FromQuery] string? title = null, [FromQuery] string? genre = null,
         [FromQuery] Guid? actorId = null, [FromQuery] MovieSortBy? sortBy = null, bool descending = true)
