@@ -18,12 +18,10 @@ public class ActorController : ControllerBase
     }
 
     /// <summary>
-    /// Search for all Movies
+    /// Search for all Actors
     /// </summary>
-    /// <param name="pageSize">How many Movies per page</param>
+    /// <param name="pageSize">How many Actors per page</param>
     /// <param name="page">The Page Number</param>
-    /// <param name="title">Filter by Movie Title</param>
-    /// <param name="genre">Filter by Genre</param>
     /// <returns></returns>
     [HttpGet("")]
     public async Task<ActionResult<PaginationDto<SimpleActorDto>>> GetActors([FromQuery] int pageSize = 20, [FromQuery] int page = 1)
@@ -36,5 +34,21 @@ public class ActorController : ControllerBase
         actors = actors.Skip((page - 1) * pageSize).Take(pageSize);
 
         return Ok(new PaginationDto<SimpleActorDto>(await actors.Select(x => x.ToDto()).ToListAsync(), page, pageSize, page - 1, page + 1));
+    }
+
+    /// <summary>
+    /// Create an 
+    /// </summary>
+    /// <param name="createActorDto"></param>
+    /// <returns></returns>
+    [HttpPut("create")]
+    public async Task<ActionResult<SimpleActorDto>> CreateActor([FromBody] CreateActorDto createActorDto)
+    {
+        Actor actor = new(createActorDto);
+
+        await _dbContext.Actors.AddAsync(actor);
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(actor.ToDto());
     }
 }
