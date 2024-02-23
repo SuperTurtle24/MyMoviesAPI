@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using MyMoviesAPI.Models;
 using MyMoviesAPI.Models.Actors;
 using MyMoviesAPI.Models.Movies;
+using System.Runtime.CompilerServices;
 
 namespace MyMoviesAPI.Controllers;
 
@@ -58,13 +59,13 @@ public class MoviesController : ControllerBase
     /// <param name="title">Filter by Movie Title</param>
     /// <param name="genre">Filter by Genre</param>
     [HttpGet("")]
-    public async Task<ActionResult<PaginationDto<MovieDto>>> GetMovies([FromQuery] int pageSize = 20, [FromQuery] int page = 1, [FromQuery] string? title = null, [FromQuery] string? genre = null, 
-        [FromQuery] MovieSortBy? sortBy = null, bool descending = true)
+    public async Task<ActionResult<PaginationDto<MovieDto>>> GetMovies([FromQuery] int pageSize = 20, [FromQuery] int page = 1, [FromQuery] string? title = null, [FromQuery] string? genre = null,
+        [FromQuery] Guid? actorId = null, [FromQuery] MovieSortBy? sortBy = null, bool descending = true)
     {
         if (page < 1) return BadRequest($"Page {page} is an invalid input");
         if (pageSize < 1) return BadRequest($"PageSize {pageSize} is an invalid input");
 
-        IQueryable<Movie> movies = _dbContext.Movies.Include(x => x.Actors).FilterMovies(genre, title);
+        IQueryable<Movie> movies = _dbContext.Movies.Include(x => x.Actors).FilterMovies(genre, title, actorId);
         if (sortBy != null) movies = SortMovies(movies, sortBy, descending);
 
         movies = movies.Skip((page - 1) * pageSize).Take(pageSize);
